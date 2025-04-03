@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="microsoft.azure.mariadb.connector.java" type="repository">
+    <properties maven-id="com.microsoft.azure:azure-mariadb-connector-java:2.7.0" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/azure-mariadb-connector-java-2.7.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

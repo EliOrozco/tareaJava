@@ -2,18 +2,20 @@
  *
  * @author Yael Eli Orozco Sandoval
  */
-import javax.swing.*; // Importa la biblioteca Swing para crear la interfaz gráfica
-import java.awt.*; // Importa la biblioteca AWT para el manejo de diseño de la interfaz
-import java.awt.event.ActionEvent; // Importa eventos de acción para los botones
-import java.awt.event.ActionListener; // Importa el listener para manejar eventos de los botones
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.io.Console;
 import java.sql.*;
+import javax.swing.JFrame;
 
 public class Main extends JFrame { // Define la clase que extiende JFrame para la interfaz gráfica
+    // Campos de texto para la entrada de datos
     private final JTextField txtNombre;
     private final JTextField txtApellido;
     private final JTextField txtEdad;
     private final JTextField txtCargo;
-    private final JTextField txtSalario; // Campos de texto para la entrada de datos
+    private final JTextField txtSalario;
 
     public Main() { // Constructor de la clase
         setTitle("Registro de Empleado"); // Establece el título de la ventana
@@ -43,38 +45,30 @@ public class Main extends JFrame { // Define la clase que extiende JFrame para l
         txtSalario = new JTextField(); // Campo de texto para el salario
         add(txtSalario);
 
-        // Botones
+        /* Botones*/
         JButton btnGuardar = new JButton("Guardar"); // Botón para guardar los datos
-        // Botones para guardar y limpiar datos
         JButton btnLimpiar = new JButton("Limpiar"); // Botón para limpiar los campos de texto
-        JButton btnMostrar = new JButton("Mostrar Todos"); // Imprime
+        JButton btnMostrar = new JButton("Mostrar Todos"); // Imprime todos los valores
 
         add(btnGuardar); // Agrega el botón Guardar a la interfaz
         add(btnLimpiar); // Agrega el botón Limpiar a la interfaz
-        add(btnMostrar);
+        add(btnMostrar); //Agrega una ventana para añadir una tabla con todos los valorfoes
 
         // Acciones de los botones
-        btnGuardar.addActionListener(new ActionListener() { // Evento al hacer clic en Guardar
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (verificarCampos()){
-                    guardarEmpleado(); // Llama al método para guardar los datos
-                }
+        // Evento al hacer clic en Guardar
+        btnGuardar.addActionListener(_ -> {
+            if (verificarCampos()){
+                guardarEmpleado(); // Llama al método para guardar los datos
             }
         });
 
-        btnLimpiar.addActionListener(new ActionListener() { // Evento al hacer clic en Limpiar
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                limpiarCampos(); // Llama al método para limpiar los campos de texto
-            }
+        // Evento al hacer clic en Limpiar
+        btnLimpiar.addActionListener(_ -> {
+            limpiarCampos(); // Llama al método para limpiar los campos de texto
         });
 
-        btnMostrar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                imprimirTodos();
-            }
+        btnMostrar.addActionListener(_ -> {
+            imprimirTodos(); // Imprime en un JFrame todos los valores de la consulta
         });
 
     }
@@ -91,8 +85,6 @@ public class Main extends JFrame { // Define la clase que extiende JFrame para l
             JOptionPane.showMessageDialog(this, "El campo de edad o el campo de salario no son el tipo correcto", "ERROR", JOptionPane.INFORMATION_MESSAGE);
             return false;
         }
-
-
 
         return true;
     }
@@ -148,29 +140,41 @@ public class Main extends JFrame { // Define la clase que extiende JFrame para l
         }
     }
 
-    public boolean imprimirTodos(){
-        String url = "jdbc:mariadb://localhost:3306/empresa"; // URL de conexión a la base de datos
-        String usuario = "root"; // Usuario de la base de datos
-        String contrasena = ""; // Contraseña de la base de datos
-        ResultSet rs = null;
+    public void imprimirTodos(){
+        //System.out.println("HOLA");
+        JFrame listar = new JFrame("Listado de Empleados");
+        listar.setSize(600, 400);
+        listar.setLocationRelativeTo(null);
 
-        String sql = "Select * from empleados"; // Consulta SQL de inserción
+        DefaultTableModel modelo = new DefaultTableModel();
+        modelo.addColumn("Nombre");
+        modelo.addColumn("Apellido");
+        modelo.addColumn("Edad");
+        modelo.addColumn("Cargo");
+        modelo.addColumn("Salario");
 
-        try (Connection conn = DriverManager.getConnection(url, usuario, contrasena); // Conecta a la base de datos
-             Statement st = conn.createStatement();) {
-            rs = st.executeQuery(sql);
+        String url = "jdbc:mariadb://localhost:3306/empresa";
+        String usuario = "root";
+        String contrasena = "";
 
-            String queryResult = rs.getString("nombre");
+        String sql = "SELECT nombre, apellido, edad, cargo, salario FROM empleados";
+        try (Connection conn = DriverManager.getConnection(url, usuario, contrasena);
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
-            if (rs.next()) {
-                JOptionPane.showMessageDialog(this, queryResult, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            while (rs.next()) {
+                Object[] fila = {
+                        rs.getString("nombre"),
+                        rs.getString("apellido"),
+                        rs.getInt("edad"),
+                        rs.getString("cargo"),
+                        rs.getDouble("salario")
+                };
+                modelo.addRow(fila);
             }
-
-
-            return true; // Retorna true si la inserción fue exitosa
-        } catch (SQLException | NumberFormatException ex) { // Captura errores de SQL o conversión de datos
-            ex.printStackTrace(); // Imprime el error en la consola
-            return false; // Retorna false si hubo un error
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al listar empleados", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 

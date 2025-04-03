@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="java">
+    <CLASSES />
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/Downloads/mariadb-connector-j-3.5.3.zip!/mariadb-connector-j-3.5.3/src/benchmark/java" />
+      <root url="jar://$USER_HOME$/Downloads/mariadb-connector-j-3.5.3.zip!/mariadb-connector-j-3.5.3/src/main/java" />
+      <root url="jar://$USER_HOME$/Downloads/mariadb-connector-j-3.5.3.zip!/mariadb-connector-j-3.5.3/src/main/java11" />
+      <root url="jar://$USER_HOME$/Downloads/mariadb-connector-j-3.5.3.zip!/mariadb-connector-j-3.5.3/src/main/java15" />
+      <root url="jar://$USER_HOME$/Downloads/mariadb-connector-j-3.5.3.zip!/mariadb-connector-j-3.5.3/src/test/java" />
+      <root url="jar://$USER_HOME$/Downloads/mariadb-connector-j-3.5.3.zip!/mariadb-connector-j-3.5.3/src/tooling/java" />
+    </SOURCES>
+  </library>
+</component>
