@@ -5,8 +5,11 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.io.Console;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
+import java.util.Properties;
 import javax.swing.JFrame;
 
 public class Main extends JFrame { // Define la clase que extiende JFrame para la interfaz gráfica
@@ -16,6 +19,9 @@ public class Main extends JFrame { // Define la clase que extiende JFrame para l
     private final JTextField txtEdad;
     private final JTextField txtCargo;
     private final JTextField txtSalario;
+    private String server = "";
+    private String user = "";
+    private String password = "";
 
     public Main() { // Constructor de la clase
         setTitle("Registro de Empleado"); // Establece el título de la ventana
@@ -23,6 +29,8 @@ public class Main extends JFrame { // Define la clase que extiende JFrame para l
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Cierra la aplicación al cerrar la ventana
         setLocationRelativeTo(null); // Centra la ventana en la pantalla
         setLayout(new GridLayout(7, 2, 5, 5)); // Define un diseño de cuadrícula con 6 filas y 2 columnas
+
+        get_properties();
 
         // Labels y Campos de Texto
         add(new JLabel("Nombre:")); // Etiqueta para el nombre
@@ -73,6 +81,32 @@ public class Main extends JFrame { // Define la clase que extiende JFrame para l
 
     }
 
+    private void get_properties(){
+        Properties prop = new Properties();
+        InputStream input = null;
+
+        try {
+            input = new FileInputStream("C:/Users/PC/OneDrive/Documentos/tareaJava/src/config.properties");
+
+            prop.load(input);
+
+            user = prop.getProperty("nombre");
+            server = prop.getProperty("server");
+
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     private boolean verificarCampos() {
         String edad = txtEdad.getText(); // Obtiene el texto del campo Edad
         String salario = txtSalario.getText(); // Obtiene el texto del campo Salario
@@ -118,8 +152,8 @@ public class Main extends JFrame { // Define la clase que extiende JFrame para l
 
     private boolean insertarEnBD(String nombre, String apellido, String edad, String cargo, String salario) {
         String url = "jdbc:mariadb://localhost:3306/empresa"; // URL de conexión a la base de datos
-        String usuario = "root"; // Usuario de la base de datos
-        String contrasena = ""; // Contraseña de la base de datos
+        String usuario = user; // Usuario de la base de datos
+        String contrasena = password; // Contraseña de la base de datos
 
         String sql = "INSERT INTO empleados (nombre, apellido, edad, cargo, salario) VALUES (?, ?, ?, ?, ?)"; // Consulta SQL de inserción
 
@@ -141,12 +175,11 @@ public class Main extends JFrame { // Define la clase que extiende JFrame para l
     }
 
     public void imprimirTodos(){
-        //System.out.println("HOLA");
-        JFrame listar = new JFrame("Listado de Empleados");
-        listar.setSize(600, 400);
-        listar.setLocationRelativeTo(null);
+        JFrame listar = new JFrame("Listado de Empleados"); //Crear ventana
+        listar.setSize(600, 400); //Ajustar tamaño
+        listar.setLocationRelativeTo(null); //Posición relativa
 
-        DefaultTableModel modelo = new DefaultTableModel();
+        DefaultTableModel modelo = new DefaultTableModel(); //Crear tabla
         modelo.addColumn("Nombre");
         modelo.addColumn("Apellido");
         modelo.addColumn("Edad");
@@ -154,13 +187,13 @@ public class Main extends JFrame { // Define la clase que extiende JFrame para l
         modelo.addColumn("Salario");
 
         String url = "jdbc:mariadb://localhost:3306/empresa";
-        String usuario = "root";
-        String contrasena = "";
+        String usuario = user;
+        String contrasena = password;
 
         String sql = "SELECT nombre, apellido, edad, cargo, salario FROM empleados";
-        try (Connection conn = DriverManager.getConnection(url, usuario, contrasena);
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = DriverManager.getConnection(url, usuario, contrasena); //Conexión
+             PreparedStatement ps = conn.prepareStatement(sql); //Consulta preparada
+             ResultSet rs = ps.executeQuery()) { //Respuesta de la consulta
 
             while (rs.next()) {
                 Object[] fila = {
@@ -176,6 +209,10 @@ public class Main extends JFrame { // Define la clase que extiende JFrame para l
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error al listar empleados", "Error", JOptionPane.ERROR_MESSAGE);
         }
+        JTable tabla = new JTable(modelo);  //Crear tabla vacia para añadir los componentes que se sacaron de la consulta
+        JScrollPane scroll = new JScrollPane(tabla);
+        listar.add(scroll);
+        listar.setVisible(true);
     }
 
     public static void main(String[] args) { // Método principal para ejecutar la aplicación
